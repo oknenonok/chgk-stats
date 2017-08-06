@@ -6,7 +6,7 @@
         </li>
       </ul>
 
-      <p class="navbar-text"><strong>{{if stats stats.name 'Статистика синхронов ЧГК'}}</strong></p>
+      <p class="navbar-text"><strong>{{if stats stats.name 'Результаты синхронов ЧГК'}}</strong></p>
       <div class="navbar-form navbar-right">
         <div class="form-group">
           <label>Город:</label>
@@ -25,7 +25,7 @@
         <th class="text-center">В</th>
         {{#each (range 1 stats.tours) as |tour|}}
           {{#each (range 1 stats.questions) as |question|}}
-            <th class="text-center {{if (eq question 1) 'left-bordered'}}">{{add question (mult (sub tour 1) 12)}}</th> 
+            <th class="text-center {{if (eq question 1) 'left-bordered'}}">{{add question (mult (sub tour 1) stats.questions)}}</th> 
           {{/each}}
         {{/each}}
       </tr>    
@@ -60,11 +60,19 @@
             </td>
           {{/each-in}}
         {{else}}
-          <td class="text-center left-bordered" colspan={{mult stats.tours stats.questions}}>Загрузка...</td>
+          <td class="text-center left-bordered" colspan={{mult stats.tours stats.questions}}>
+            {{#if percentageError}}
+              <span class="text-danger">{{percentageError.message}}</span>
+            {{else}}
+              Загрузка...
+            {{/if}}
+          </td>
         {{/if}}
       </tr>
     </tfoot>
   </table>
+{{else if statsError}}
+  <p class="text-danger">{{statsError.message}}</p>
 {{else}}
-  <p>Загрузка статистики...</p>
+  <p>Загрузка результатов...</p>
 {{/if}}

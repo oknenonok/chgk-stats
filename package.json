@@ -1,9 +1,11 @@
 {
   "name": "chgk-stats",
   "version": "0.0.1",
-  "description": "Результаты турниров ЧГК в удобочитаемом виде",
+  "description": "Human-readable standings from rating.chgk.info",
   "license": "MIT",
-  "author": "",
+  "author": {
+    "name": "Andrey Kononenko"
+  },
   "directories": {
     "doc": "doc",
     "test": "tests"

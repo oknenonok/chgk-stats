@@ -1,6 +1,6 @@
 <nav class="navbar navbar-default">
   <div class="container-fluid">
-      <p class="navbar-text"><strong>Статистика синхронов ЧГК</strong></p>
+      <p class="navbar-text"><strong>Результаты синхронов ЧГК</strong></p>
   </div>
 </nav>
 
@@ -25,6 +25,8 @@
     {{/each}}
     </tbody>
  </table>
+{{else if loadError}}
+  <p class="text-danger">{{loadError.message}}</p>
 {{else}}
   <p>Загрузка списка турниров...</p>
 {{/if}}

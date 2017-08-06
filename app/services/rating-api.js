@@ -64,9 +64,15 @@ export default Ember.Service.extend({
   getTournaments() {
     const cacheKey = 'tournaments';
     return this.checkCache(cacheKey) || this.loadURL('api/tournaments.json').then(data => {
+      if (!data || !data.items) {
+        throw new Error('Сервер вернул некорректный результат');
+      }
       let result = data.items.filter(item => {
         return item.type_name === 'Синхрон' && (new Date(item.date_end) <= new Date());
       });
+      if (!result.length) {
+        throw new Error('Не удалось получить список турниров');
+      }
       this.setCache(cacheKey, result);
       return result;
     });
@@ -81,6 +87,9 @@ export default Ember.Service.extend({
       const doc = Ember.$(html);
       const table = doc.find('#teams_table');
       const rows = table.find('TBODY TR');
+      if (!rows || !rows.length) {
+        throw new Error('Не удалось получить статистику по командам');
+      }
       let data = {
         name: doc.find('H1').text(),
         tours: table.find('THEAD TH[data-tour]').length,
@@ -88,8 +97,8 @@ export default Ember.Service.extend({
         commands: []
       }
       for (let i = 0; i < rows.length; i++) {
-        let tds = Ember.$(rows[i]).children();
-        let city = tds[2].textContent.trim();
+        const tds = Ember.$(rows[i]).children();
+        const city = tds[2].textContent.trim();
         if (city.toLowerCase() === this.get('city').toLowerCase().trim()) {
           let stat = {
             city: city,
@@ -100,6 +109,9 @@ export default Ember.Service.extend({
             results: {}
           }
           for (let j = 1; j <= data.tours; j++) {
+            if (!tds[j+5].dataset.mask) {
+              throw new Error(`Нет данных за ${j} тур`);
+            }
             stat.results[j] = JSON.parse(tds[j+5].dataset.mask);
           }
           data.commands.push(stat);
@@ -120,6 +132,9 @@ export default Ember.Service.extend({
       const doc = Ember.$(html);
       const table = doc.find('#question_statistics_table');
       const rows = table.find('TBODY TR');
+      if (!rows || !rows.length) {
+        throw new Error('Не удалось получить статистику взятия');
+      }
       let data = {}
       for (let i = 0; i < rows.length; i++) {
         let tds = Ember.$(rows[i]).children();
