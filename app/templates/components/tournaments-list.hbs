@@ -1,0 +1,30 @@
+<nav class="navbar navbar-default">
+  <div class="container-fluid">
+      <p class="navbar-text"><strong>Статистика синхронов ЧГК</strong></p>
+  </div>
+</nav>
+
+{{#if tournaments}}
+  <table class="table table-striped">
+  <thead>
+    <tr>
+      <th>Название</th>
+      <th>Окончание</th>
+     </tr>
+  </thead>
+  <tbody>
+    {{#each tournaments as |tournament|}}
+      <tr>
+        <td>
+          {{#link-to 'tournament' tournament.idtournament}}{{tournament.name}}{{/link-to}}
+        </td>
+        <td>
+          {{tournament.date_end}}
+        </td>
+      </tr>
+    {{/each}}
+    </tbody>
+ </table>
+{{else}}
+  <p>Загрузка списка турниров...</p>
+{{/if}}
