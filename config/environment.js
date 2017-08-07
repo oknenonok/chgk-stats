@@ -6,7 +6,7 @@ module.exports = function(environment) {
     modulePrefix: 'chgk-stats',
     environment,
     rootURL: '',
-    locationType: 'auto',
+    locationType: 'hash',
     defaultCity: 'Владивосток',
     EmberENV: {
       FEATURES: {
