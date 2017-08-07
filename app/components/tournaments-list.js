@@ -7,6 +7,7 @@ export default Ember.Component.extend({
   loadError: null,
 
   loadList: Ember.on('didInsertElement', function() {
+    document.title = 'Результаты синхронов ЧГК';
     this.get('api').getTournaments().then(data => {
       this.set('tournaments', data);
     }).catch(e => {

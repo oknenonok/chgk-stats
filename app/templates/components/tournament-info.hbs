@@ -21,8 +21,10 @@
     <thead>
       <tr>
         <th>Команда</th>
-        <th class="text-center">М</th>
-        <th class="text-center">В</th>
+        <th class="text-center" title="Состав">С</th>
+        <th class="text-center" title="Место">М</th>
+        <th class="text-center" title="Рейтинг">Б</th>
+        <th class="text-center" title="Всего взято">В</th>
         {{#each (range 1 stats.tours) as |tour|}}
           {{#each (range 1 stats.questions) as |question|}}
             <th class="text-center {{if (eq question 1) 'left-bordered'}}">{{add question (mult (sub tour 1) stats.questions)}}</th> 
@@ -34,13 +36,17 @@
       {{#each stats.commands as |command|}}
         <tr>
           <td title={{command.realName}}>{{command.name}}</td>
+          <td>{{#if rating}}<abbr title={{get (get rating command.id) 'people'}}>?</abbr>{{else}}&nbsp;{{/if}}</td>
           <td>{{command.place}}</td>
+          <td class="text-right small-padding">{{get (get rating command.id) 'bonus'}}</td>
           <td class="text-right">{{command.total}}</td>
           {{#each-in command.results as |tourId tourResults|}}
             {{#each-in tourResults as |question result|}}
               <td class="text-center {{if (eq (mod question stats.questions) 1) 'left-bordered'}}">
                 {{#if (eq result '1')}}
-                  <span class="text-success glyphicon glyphicon-plus"></span>
+                  <span class="text-success glyphicon glyphicon-ok-circle"></span>
+                {{else if (eq result 'X')}}
+                  <span class="text-muted glyphicon glyphicon-remove"></span>
                 {{else}}
                   <span class="text-muted glyphicon glyphicon-minus"></span>
                 {{/if}}
@@ -52,11 +58,13 @@
     </tbody>
     <tfoot>
       <tr>
-        <th colspan="3">% взятия</th>
+        <th colspan="5">% взятия</th>
         {{#if percentage}}
-          {{#each-in percentage as |question percent|}}
-            <td class="text-center small-padding {{if (eq (mod question stats.questions) 1) 'left-bordered'}}" style={{percentcolor percent 'background'}}>
-              <small>{{percent}}</small>
+          {{#each-in percentage as |question data|}}
+            <td title={{concat data.number ' из ' stats.commandsTotal}} 
+                class="text-center small-padding {{if (eq (mod question stats.questions) 1) 'left-bordered'}}" 
+                style={{percentcolor data.percent 'background'}}>
+              <small>{{data.percent}}</small>
             </td>
           {{/each-in}}
         {{else}}

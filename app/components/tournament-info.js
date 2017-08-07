@@ -7,8 +7,10 @@ export default Ember.Component.extend({
 
   stats: null,
   percentage: null,
+  rating: null,
   statsError: null,
   percentageError: null,
+  ratingError: null,
 
   actions: {
     refresh() {
@@ -19,9 +21,11 @@ export default Ember.Component.extend({
   loadStats: Ember.on('didInsertElement', function() {
     this.set('stats', null);
     this.set('percentage', null);
+    this.set('rating', null);
 
     this.get('api').getTournamentStats(this.get('id')).then(data => {
       this.set('stats', data);
+      document.title = data.name;
     }).catch(e => {
       this.set('statsError', e);
     });
@@ -30,6 +34,12 @@ export default Ember.Component.extend({
       this.set('percentage', data);
     }).catch(e => {
       this.set('percentageError', e);
+    });
+
+    this.get('api').getTournamentRating(this.get('id')).then(data => {
+      this.set('rating', data);
+    }).catch(e => {
+      this.set('ratingError', e);
     });
   })
 });

@@ -94,13 +94,16 @@ export default Ember.Service.extend({
         name: doc.find('H1').text(),
         tours: table.find('THEAD TH[data-tour]').length,
         questions: parseInt(doc.find('.center_message em').text().replace(/[^0-9]+/g, '')),
+        commandsTotal: parseInt(doc.find('#tournament_info').html().match(/Количество команд[^\d]+(\d+)/)[1]),
         commands: []
       }
       for (let i = 0; i < rows.length; i++) {
         const tds = Ember.$(rows[i]).children();
         const city = tds[2].textContent.trim();
         if (city.toLowerCase() === this.get('city').toLowerCase().trim()) {
-          let stat = {
+          const id = tds[1].innerHTML.match(/team\/(\d+)/)[1];
+          const stat = {
+            id: id,
             city: city,
             name: tds[1].textContent.trim(),
             place: tds[3].textContent.trim(),
@@ -138,7 +141,41 @@ export default Ember.Service.extend({
       let data = {}
       for (let i = 0; i < rows.length; i++) {
         let tds = Ember.$(rows[i]).children();
-        data[tds[0].textContent.trim()] = parseFloat(tds[2].textContent.trim()).toFixed(1);
+        data[tds[0].textContent.trim()] = {
+          number: parseInt(tds[1].textContent.trim()),
+          percent: parseFloat(tds[2].textContent.trim()).toFixed(1)
+        }
+      }
+      doc.remove();
+      this.setCache(cacheKey, data);
+      return data;
+    });
+  },
+
+  /**
+  * Получить рейтинги и составы команд
+  */
+  getTournamentRating(id) {
+    const cacheKey = `rating-${this.get('city')}-${id}`;
+    return this.checkCache(cacheKey) || this.loadURL(`tournament/${id}/`, 'html').then(html => {
+      const doc = Ember.$(html);
+      const table = doc.find('#teams_table');
+      const rows = table.find('TBODY TR');
+      if (!rows || !rows.length) {
+        throw new Error('Не удалось получить статистику по командам');
+      }
+      let data = {}
+      for (let i = 0; i < rows.length; i++) {
+        const tds = Ember.$(rows[i]).children();
+        const city = tds[2].textContent.trim();
+        if (city.toLowerCase() === this.get('city').toLowerCase().trim()) {
+          const id = tds[1].innerHTML.match(/team\/(\d+)/)[1];
+          const stat = {
+            bonus: Ember.$(tds[9]).find('A').text().trim(),
+            people: Ember.$(tds[3]).find('.team_details').html().replace(/\s+/g, ' ').replace(/<br[^>]*>/g, "\n").replace(/<[^>]+>/g, '').replace(/\s*\n\s*/g, "\n").trim()
+          }
+          data[id] = stat;
+        }
       }
       doc.remove();
       this.setCache(cacheKey, data);
