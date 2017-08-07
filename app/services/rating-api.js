@@ -2,7 +2,7 @@ import Ember from 'ember';
 import config from '../config/environment';
 
 export default Ember.Service.extend({
-  urlPrefix: 'http://cors-anywhere.herokuapp.com/http://rating.chgk.info/',
+  urlPrefix: 'https://cors-anywhere.herokuapp.com/http://rating.chgk.info/',
   cache: {},
   cacheTime: 30, // минуты жизни кеша
 
