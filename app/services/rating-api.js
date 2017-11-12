@@ -63,18 +63,32 @@ export default Ember.Service.extend({
   */
   getTournaments() {
     const cacheKey = 'tournaments';
-    return this.checkCache(cacheKey) || this.loadURL('api/tournaments.json').then(data => {
-      if (!data || !data.items) {
-        throw new Error('Сервер вернул некорректный результат');
-      }
-      let result = data.items.filter(item => {
-        return item.type_name === 'Синхрон' && (new Date(item.date_end) <= new Date());
-      });
-      if (!result.length) {
+    return this.checkCache(cacheKey) || this.loadURL(`tournaments.php?tournament_type=3&order=date_end&page=1`, 'html').then(html => {
+      const doc = Ember.$(html);
+      const table = doc.find('.tournaments_list_table');
+      const rows = table.find('TBODY TR:not(".tournament_in_future")');
+      if (!rows || !rows.length) {
         throw new Error('Не удалось получить список турниров');
       }
-      this.setCache(cacheKey, result);
-      return result;
+      let data = [];
+      for (let i = 0; i < rows.length; i++) {
+        const tds = Ember.$(rows[i]).children();
+        if (tds.length < 7) {
+          continue;
+        }
+        const date_end = tds[2].textContent.trim();
+        const date_end_int = new Date(date_end.replace(/^(\d{2})\.(\d{2})\.(\d{2})$/, '20$3-$2-$1'));
+        if (date_end_int > new Date()) {
+          continue;
+        }
+        const idtournament = tds[0].textContent.trim();
+        const name = tds[1].textContent.trim();
+        const dl = Ember.$(tds[5]).find('.var-dl').text().trim();
+        data.push({ idtournament, name, date_end, dl });
+      }
+      doc.remove();
+      this.setCache(cacheKey, data);
+      return data;
     });
   },
 
