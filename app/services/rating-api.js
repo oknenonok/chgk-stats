@@ -28,7 +28,7 @@ export default Ember.Service.extend({
       Ember.$.ajax({
         url: `${this.get('urlPrefix')}${url}`,
         type: 'GET',
-        dataType: dataType,
+        dataType: dataType
       }).done((data) => {
         this.setCache(cacheKey, data);
         resolve(data);
@@ -54,8 +54,8 @@ export default Ember.Service.extend({
   setCache(key, data) {
     this.get('cache')[key] = {
       timestamp: (new Date()).getTime(),
-      data: data,
-    }
+      data: data
+    };
   },
 
   /**
@@ -82,7 +82,7 @@ export default Ember.Service.extend({
           continue;
         }
         const idtournament = tds[0].textContent.trim();
-        const name = tds[1].textContent.trim();
+        const name = Ember.$(tds[1]).find('a:eq(0)').text().trim();
         const dl = Ember.$(tds[5]).find('.var-dl').text().trim();
         data.push({ idtournament, name, date_end, dl });
       }
@@ -107,10 +107,18 @@ export default Ember.Service.extend({
       let data = {
         name: doc.find('H1').text(),
         tours: table.find('THEAD TH[data-tour]').length,
-        questions: parseInt(doc.find('.center_message em').text().replace(/[^0-9]+/g, '')),
+        questions: doc.find('.center_message em').text().replace(/[^0-9;]+/g, '').split(';').map(item => parseInt(item)),
         commandsTotal: parseInt(doc.find('#tournament_info').html().match(/Количество команд[^\d]+(\d+)/)[1]),
         commands: []
+      };
+      //'.center_message em' contains single number for tournaments with fixed number of questions in each round
+      // or semicolon-separated numbers if rounds have different number of questions
+      if (data.questions.length == 1) {
+        for (let i = 1; i < data.tours; i++) {
+          data.questions[i] = parseInt(data.questions[0]);
+        }
       }
+      data.totalQuestions = data.questions.reduce((accumulator, currentValue) => accumulator + currentValue);
       for (let i = 0; i < rows.length; i++) {
         const tds = Ember.$(rows[i]).children();
         const city = tds[2].textContent.trim();
@@ -119,12 +127,12 @@ export default Ember.Service.extend({
           const stat = {
             id: id,
             city: city,
-            name: tds[1].textContent.trim(),
+            name: Ember.$(tds[1]).find('span:eq(0)').text().trim(),
             place: tds[3].textContent.trim(),
             total: tds[4].textContent.trim(),
             realName: Ember.$(tds[1]).find('A[title]').attr('title'),
             results: {}
-          }
+          };
           for (let j = 1; j <= data.tours; j++) {
             if (!tds[j+5].dataset.mask) {
               throw new Error(`Нет данных за ${j} тур`);
@@ -152,13 +160,13 @@ export default Ember.Service.extend({
       if (!rows || !rows.length) {
         throw new Error('Не удалось получить статистику взятия');
       }
-      let data = {}
+      let data = {};
       for (let i = 0; i < rows.length; i++) {
         let tds = Ember.$(rows[i]).children();
         data[tds[0].textContent.trim()] = {
           number: parseInt(tds[1].textContent.trim()),
           percent: parseFloat(tds[2].textContent.trim()).toFixed(1)
-        }
+        };
       }
       doc.remove();
       this.setCache(cacheKey, data);
@@ -178,7 +186,7 @@ export default Ember.Service.extend({
       if (!rows || !rows.length) {
         throw new Error('Не удалось получить статистику по командам');
       }
-      let data = {}
+      let data = {};
       for (let i = 0; i < rows.length; i++) {
         const tds = Ember.$(rows[i]).children();
         const city = tds[2].textContent.trim();
@@ -187,7 +195,7 @@ export default Ember.Service.extend({
           const stat = {
             bonus: Ember.$(tds[9]).find('A').text().trim(),
             people: Ember.$(tds[3]).find('.team_details').html().replace(/\s+/g, ' ').replace(/<br[^>]*>/g, "\n").replace(/<[^>]+>/g, '').replace(/\s*\n\s*/g, "\n").trim()
-          }
+          };
           data[id] = stat;
         }
       }

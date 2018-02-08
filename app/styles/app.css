@@ -18,6 +18,7 @@ html {
 
 body {
   margin-bottom: 40px;
+  counter-reset: question;
 }
 
 .footer {
@@ -29,4 +30,9 @@ body {
   background-color: #f5f5f5;
   border-top: 1px solid #e7e7e7;
   padding-left: 40px;
+}
+
+.question-number::before {
+  counter-increment: question;
+  content: counter(question);
 }

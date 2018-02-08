@@ -25,12 +25,10 @@
         <th class="text-center" title="Место">М</th>
         <th class="text-center" title="Рейтинг">Б</th>
         <th class="text-center" title="Всего взято">В</th>
-        {{#each (range 1 stats.tours) as |tour|}}
-          {{#each (range 1 stats.questions) as |question|}}
-            <th class="text-center {{if (eq question 1) 'left-bordered'}}">{{add question (mult (sub tour 1) stats.questions)}}</th> 
-          {{/each}}
+        {{#each (range 1 stats.totalQuestions) as |question|}}
+          <th class="text-center question-number {{if (isFirstQuestion question stats.questions) 'left-bordered'}}"></th>
         {{/each}}
-      </tr>    
+      </tr>
     </thead>
     <tbody>
       {{#each stats.commands as |command|}}
@@ -42,7 +40,7 @@
           <td class="text-right">{{command.total}}</td>
           {{#each-in command.results as |tourId tourResults|}}
             {{#each-in tourResults as |question result|}}
-              <td class="text-center {{if (eq (mod question stats.questions) 1) 'left-bordered'}}">
+              <td class="text-center {{if (isFirstQuestion question stats.questions) 'left-bordered'}}">
                 {{#if (eq result '1')}}
                   <span class="text-success glyphicon glyphicon-ok-circle"></span>
                 {{else if (eq result 'X')}}
@@ -61,14 +59,14 @@
         <th colspan="5">% взятия</th>
         {{#if percentage}}
           {{#each-in percentage as |question data|}}
-            <td title={{concat data.number ' из ' stats.commandsTotal}} 
-                class="text-center small-padding {{if (eq (mod question stats.questions) 1) 'left-bordered'}}" 
+            <td title={{concat data.number ' из ' stats.commandsTotal}}
+                class="text-center small-padding {{if (isFirstQuestion question stats.questions) 'left-bordered'}}"
                 style={{percentcolor data.percent 'background'}}>
               <small>{{data.percent}}</small>
             </td>
           {{/each-in}}
         {{else}}
-          <td class="text-center left-bordered" colspan={{mult stats.tours stats.questions}}>
+          <td class="text-center left-bordered" colspan={{stats.totalQuestions}}>
             {{#if percentageError}}
               <span class="text-danger">{{percentageError.message}}</span>
             {{else}}
